@@ -6,6 +6,7 @@ import com.ssd.user_service.model.User;
 import com.ssd.user_service.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,8 @@ public class UserService {
 
     @Autowired
     UserRepository userRepository;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserDTO register(UserRegistrationRequest request) {
         boolean usernameExists = userRepository.findByUsername(request.getUsername()).isPresent();
@@ -26,7 +29,7 @@ public class UserService {
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .password(request.getPassword()) // should be encrypted!
+                .password(passwordEncoder.encode(request.getPassword()))
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -45,6 +48,7 @@ public class UserService {
         return UserDTO.builder()
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .password(user.getPassword())
                 .build();
     }
 }
